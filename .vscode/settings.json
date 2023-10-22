@@ -59,6 +59,7 @@
 		"set": "cpp",
 		"iomanip": "cpp",
 		"codecvt": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"condition_variable": "cpp"
 	}
 }

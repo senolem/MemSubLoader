@@ -4,7 +4,7 @@ using namespace Gdiplus;
 // Global variables assignment
 
 // Global resources
-std::map<wchar_t *, Config> configs;
+std::map<wchar_t *, Config, WStringCompare> configs;
 std::wstring textToDraw;
 Config tmpConfig = {};
 wchar_t gamePath[MAX_PATH] = {};

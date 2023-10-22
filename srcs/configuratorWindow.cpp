@@ -25,7 +25,7 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						break;
 					}
 
-					std::map<wchar_t *, Config>::iterator iter = getConfig(selectedIdentifier);
+					std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(selectedIdentifier);
 					if (iter != configs.end())
 					{
 						if (!IsWindow(settingsHWND))
@@ -33,8 +33,8 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 							tmpConfig = iter->second;
 							if (createSettingsWindow(hwnd))
 							{
-								free(selectedIdentifier);
 								MessageBox(hwnd, L"Error: Failed to initialize settings window", L"Window initialization", MB_ICONERROR);
+								free(selectedIdentifier);
 								break;
 							}
 						}
@@ -47,8 +47,8 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 								tmpConfig = iter->second;
 								if (createSettingsWindow(hwnd))
 								{
-									free(selectedIdentifier);
 									MessageBox(hwnd, L"Error: Failed to initialize settings window", L"Window initialization", MB_ICONERROR);
+									free(selectedIdentifier);
 									break;
 								}
 							}
@@ -58,7 +58,7 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 					else
 					{
 						wchar_t message[256] = {};
-						wsprintf(message, L"Failed to get config using identifier '%s'", iter->first);
+						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
 						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
 					}
 					free(selectedIdentifier);
@@ -67,33 +67,154 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 
 				case CONFIGURATOR_NEW_BUTTON:
 				{
-					InputBox inputBox;
-					std::wstring result;
+					wchar_t buffer[32] = { 0 };
+					CWin32InputBox::InputBox(L"Create new configuration", L"New configuration name :", buffer, 32, false, hwnd);
 
-					result = inputBox.ShowInputBox(L"Create new configuration", L"New configuration name");
-					if (result[0] != L'\0')
+					if (buffer[0] != L'\0')
 					{
+						std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(buffer);
+						if (iter != configs.end())
+						{
+							MessageBox(hwnd, L"New configuration name already exists", L"Create new configuration", MB_ICONERROR);
+							break;
+						}
+
 						Config newConfig = {};
-						newConfig.identifier = wcsdup(result.c_str());
-						configs.insert({ wcsdup(result.c_str()), newConfig});
+						newConfig.identifier = wcsdup(buffer);
+						configs.insert({ wcsdup(buffer), newConfig });
+						updateConfiguratorWindowAttributes();
+					}
+					else
+					{
+						MessageBox(hwnd, L"New configuration name cannot be empty", L"Create new configuration", MB_ICONERROR);
+						break;
 					}
 				}
 				break;
 
 				case CONFIGURATOR_DELETE_BUTTON:
 				{
+					wchar_t *selectedIdentifier = getSelectedIdentifier();
+					if (!selectedIdentifier)
+					{
+						break;
+					}
 
+					if (wcscmp(selectedIdentifier, L"DEFAULT") == 0)
+					{
+						MessageBox(hwnd, L"You cannot delete DEFAULT configuration", L"Delete configuration", MB_ICONERROR);
+						free(selectedIdentifier);
+						break;
+					}
+
+					std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(selectedIdentifier);
+					if (iter != configs.end())
+					{
+						wchar_t message[256] = {};
+						wsprintf(message, L"Are you sure you want to delete configuration with identifier '%s'?", iter->first);
+						int result = MessageBox(hwnd, message, L"Delete configuration", MB_OKCANCEL | MB_ICONWARNING);
+						if (result == IDOK)
+						{
+							free(iter->first);
+							free(iter->second.identifier);
+							configs.erase(selectedIdentifier);
+							updateConfiguratorWindowAttributes();
+						}
+					}
+					else
+					{
+						wchar_t message[256] = {};
+						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
+						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
+					}
+					free(selectedIdentifier);
 				}
 				break;
 
 				case CONFIGURATOR_DUPLICATE_BUTTON:
 				{
+					wchar_t *selectedIdentifier = getSelectedIdentifier();
+					if (!selectedIdentifier)
+					{
+						break;
+					}
 
+					std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(selectedIdentifier);
+					if (iter != configs.end())
+					{
+						wchar_t buffer[32] = { 0 };
+						CWin32InputBox::InputBox(L"Duplicate configuration", L"Duplicated configuration name :", buffer, 32, false, hwnd);
+
+						
+						if (buffer[0] != L'\0')
+						{
+							std::map<wchar_t *, Config, WStringCompare>::iterator iter2 = getConfig(buffer);
+							if (iter2 != configs.end())
+							{
+								MessageBox(hwnd, L"Duplicated configuration name already exists", L"Duplicate configuration", MB_ICONERROR);
+								free(selectedIdentifier);
+								break;
+							}
+
+							Config newConfig = iter->second;
+							newConfig.identifier = wcsdup(buffer);
+							configs.insert({ wcsdup(buffer), newConfig });
+							updateConfiguratorWindowAttributes();
+						}
+						else
+						{
+							MessageBox(hwnd, L"Duplicated configuration name cannot be empty", L"Duplicate configuration", MB_ICONERROR);
+							free(selectedIdentifier);
+							break;
+						}
+					}
+					else
+					{
+						wchar_t message[256] = {};
+						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
+						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
+					}
+					free(selectedIdentifier);
 				}
 				break;
 
 				case CONFIGURATOR_TODEFAULT_BUTTON:
 				{
+					wchar_t *selectedIdentifier = getSelectedIdentifier();
+					if (!selectedIdentifier)
+					{
+						break;
+					}
+
+					std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(selectedIdentifier);
+					if (iter != configs.end())
+					{
+						wchar_t buffer[8] = L"DEFAULT";
+						std::map<wchar_t *, Config, WStringCompare>::iterator iter2 = getConfig(buffer);
+						if (iter2 != configs.end())
+						{
+							wchar_t *defaultIdentifier = iter->second.identifier;
+							iter->second = iter2->second;
+							iter->second.identifier = defaultIdentifier;
+
+							wchar_t message[256] = {};
+							wsprintf(message, L"Configuration '%s' successfully copied to default", selectedIdentifier);
+							MessageBox(hwnd, message, L"Copy configuration to default", MB_ICONINFORMATION);
+						}
+						else
+						{
+							wchar_t message[256] = {};
+							wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
+							MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
+						}
+					}
+					else
+					{
+						wchar_t message[256] = {};
+						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
+						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
+					}
+					free(selectedIdentifier);
 				}
 				break;
 			}
@@ -154,17 +275,17 @@ int createConfiguratorWindow(HWND parent)
 	HWND copyToDefaultButton = CreateWindowEx(0, WC_BUTTON, (L"Copy to default"), WS_VISIBLE | WS_CHILD | WS_TABSTOP, 375, 125, 93, 23, configuratorHWND, (HMENU)CONFIGURATOR_TODEFAULT_BUTTON, configuratorWindowClass.hInstance, 0);
 	SendMessage(copyToDefaultButton, WM_SETFONT, (WPARAM)hFont, FALSE);
 
-	updateConfiguratorWindowAttributes(configuratorHWND);
+	updateConfiguratorWindowAttributes();
 	return 0;
 }
 
 // Configurator window update
-void updateConfiguratorWindowAttributes(HWND hwnd)
+void updateConfiguratorWindowAttributes(void)
 {
 	ListView_DeleteAllItems(configList);
 
 	int i = 1;
-	for (std::map<wchar_t *, Config>::iterator iter = configs.begin(); iter != configs.end(); iter++)
+	for (std::map<wchar_t *, Config, WStringCompare>::iterator iter = configs.begin(); iter != configs.end(); iter++)
 	{
 		LVITEM lvi = {};
 		lvi.mask = LVIF_TEXT | LVIF_PARAM;

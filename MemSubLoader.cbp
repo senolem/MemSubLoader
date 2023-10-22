@@ -47,7 +47,6 @@
 			<Add library="bin/Release/OutlineText.dll" />
 			<Add library="bin/Release/JsonCpp.dll" />
 		</Linker>
-		<Unit filename="includes/InputBox.h" />
 		<Unit filename="includes/MemSubLoader.hpp" />
 		<Unit filename="resources/MemSubLoader.rc">
 			<Option compilerVar="WINDRES" />

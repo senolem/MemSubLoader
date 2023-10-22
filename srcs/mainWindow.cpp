@@ -68,7 +68,7 @@ LRESULT CALLBACK mainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 					if (openFileExplorer(hwnd, selectedFile, MAX_PATH, MENU_LOAD))
 					{
-						std::map<wchar_t *, Config> tmp = configs;
+						std::map<wchar_t *, Config, WStringCompare> tmp = configs;
 
 						if (!loadConfig(selectedFile))
 						{

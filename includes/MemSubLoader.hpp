@@ -20,7 +20,7 @@
 # include <gdiplus.h>
 # include "OutlineText.h"
 # include "json.h"
-# include "InputBox.h"
+# include "Win32InputBox.h"
 # include "resource.h"
 
 // Main controls
@@ -145,10 +145,18 @@ struct Config {
 	bool areaPreview;
 };
 
+struct WStringCompare
+{
+	bool operator()(const wchar_t* str1, const wchar_t* str2) const
+	{
+		return wcscmp(str1, str2) < 0;
+	}
+};
+
 // Global variables definition
 
 // Global resources
-extern std::map<wchar_t *, Config> configs;
+extern std::map<wchar_t *, Config, WStringCompare> configs;
 extern std::wstring textToDraw;
 extern Config tmpConfig;
 extern wchar_t gamePath[MAX_PATH];
@@ -209,25 +217,25 @@ extern int oldAreaHeight;
 class Subtitles
 {
 	private:
-	    uintptr_t bAddress_audio;
-	    std::vector <int> offset_audio;
-	    uintptr_t bAddress_play;
-	    std::vector <int> offset_play;
-	    void findAddress(uintptr_t &address, int offset, HANDLE hProcess);
+		uintptr_t bAddress_audio;
+		std::vector <int> offset_audio;
+		uintptr_t bAddress_play;
+		std::vector <int> offset_play;
+		void findAddress(uintptr_t &address, int offset, HANDLE hProcess);
 
 	public:
-	    uintptr_t address_audio;
-	    uintptr_t address_play;
-	    int AudioID;
-	    int lastAudioID;
-	    bool is_playing;
-	    std::vector <int> ID;
-	    std::vector <std::wstring> Text;
+		uintptr_t address_audio;
+		uintptr_t address_play;
+		int AudioID;
+		int lastAudioID;
+		bool is_playing;
+		std::vector <int> ID;
+		std::vector <std::wstring> Text;
 
-	    void search_memory(HANDLE hProcess);
-	    bool check_audio(HANDLE hProcess);
-	    void file_memory(std::wifstream& file);
-	    void file_text(std::wifstream& file);
+		void search_memory(HANDLE hProcess);
+		bool check_audio(HANDLE hProcess);
+		void file_memory(std::wifstream& file);
+		void file_text(std::wifstream& file);
 };
 
 // Main
@@ -248,7 +256,7 @@ void handleUpdown(HWND hwnd, int &value, int &oldValue, const wchar_t *name, int
 void handleEdit(HWND hwnd, int &value, int &oldValue, const wchar_t *name, int id, int min, int max, WPARAM wParam);
 
 int createConfiguratorWindow(HWND parent);
-void updateConfiguratorWindowAttributes(HWND hwnd);
+void updateConfiguratorWindowAttributes();
 LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // Utilities
@@ -266,7 +274,7 @@ bool setAutoloadConfigPath(const wchar_t *path);
 bool getAutoloadConfigPath(wchar_t *path);
 bool getAutoloadPath(wchar_t *executablePath);
 Gdiplus::StringAlignment getConfigAlignment(TextAlignment alignment);
-std::map<wchar_t *, Config>::iterator getConfig(wchar_t * identifier);
+std::map<wchar_t *, Config, WStringCompare>::iterator getConfig(wchar_t * identifier);
 wchar_t *getSelectedIdentifier(void);
 
 void cleanup(void);

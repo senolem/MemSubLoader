@@ -481,9 +481,9 @@ Gdiplus::StringAlignment getConfigAlignment(TextAlignment alignment)
 	}
 }
 
-std::map<wchar_t *, Config>::iterator getConfig(wchar_t *identifier)
+std::map<wchar_t *, Config, WStringCompare>::iterator getConfig(wchar_t *identifier)
 {
-	std::map<wchar_t *, Config>::iterator iter = configs.find(identifier);
+	std::map<wchar_t *, Config, WStringCompare>::iterator iter = configs.find(identifier);
 	return iter;
 }
 
@@ -510,7 +510,7 @@ wchar_t *getSelectedIdentifier(void)
 
 void cleanup(void)
 {
-	for (std::map<wchar_t *, Config>::iterator iter = configs.begin(); iter != configs.end(); iter++)
+	for (std::map<wchar_t *, Config, WStringCompare>::iterator iter = configs.begin(); iter != configs.end(); iter++)
 	{
 		free(iter->first);
 		free(iter->second.identifier);
