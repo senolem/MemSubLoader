@@ -34,7 +34,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 							if (createSettingsWindow(hwnd))
 							{
 								MessageBox(hwnd, L"Error: Failed to initialize settings window", L"Window initialization", MB_ICONERROR);
-								free(selectedIdentifier);
 								break;
 							}
 						}
@@ -48,11 +47,11 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 								if (createSettingsWindow(hwnd))
 								{
 									MessageBox(hwnd, L"Error: Failed to initialize settings window", L"Window initialization", MB_ICONERROR);
-									free(selectedIdentifier);
 									break;
 								}
 							}
 						}
+						updateSettingsWindowAttributes(settingsHWND);
 						ShowWindow(settingsHWND, SW_SHOW);
 					}
 					else
@@ -61,13 +60,12 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
 						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
 					}
-					free(selectedIdentifier);
 				}
 				break;
 
 				case CONFIGURATOR_NEW_BUTTON:
 				{
-					wchar_t buffer[32] = { 0 };
+					wchar_t buffer[33] = { 0 };
 					CWin32InputBox::InputBox(L"Create new configuration", L"New configuration name :", buffer, 32, false, hwnd);
 
 					if (buffer[0] != L'\0')
@@ -103,7 +101,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 					if (wcscmp(selectedIdentifier, L"DEFAULT") == 0)
 					{
 						MessageBox(hwnd, L"You cannot delete DEFAULT configuration", L"Delete configuration", MB_ICONERROR);
-						free(selectedIdentifier);
 						break;
 					}
 
@@ -127,7 +124,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
 						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
 					}
-					free(selectedIdentifier);
 				}
 				break;
 
@@ -142,17 +138,15 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 					std::map<wchar_t *, Config, WStringCompare>::iterator iter = getConfig(selectedIdentifier);
 					if (iter != configs.end())
 					{
-						wchar_t buffer[32] = { 0 };
+						wchar_t buffer[33] = { 0 };
 						CWin32InputBox::InputBox(L"Duplicate configuration", L"Duplicated configuration name :", buffer, 32, false, hwnd);
 
-						
 						if (buffer[0] != L'\0')
 						{
 							std::map<wchar_t *, Config, WStringCompare>::iterator iter2 = getConfig(buffer);
 							if (iter2 != configs.end())
 							{
 								MessageBox(hwnd, L"Duplicated configuration name already exists", L"Duplicate configuration", MB_ICONERROR);
-								free(selectedIdentifier);
 								break;
 							}
 
@@ -164,7 +158,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						else
 						{
 							MessageBox(hwnd, L"Duplicated configuration name cannot be empty", L"Duplicate configuration", MB_ICONERROR);
-							free(selectedIdentifier);
 							break;
 						}
 					}
@@ -174,7 +167,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
 						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
 					}
-					free(selectedIdentifier);
 				}
 				break;
 
@@ -214,7 +206,6 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 						wsprintf(message, L"Failed to get config using identifier '%s'", selectedIdentifier);
 						MessageBox(hwnd, message, L"Window initialization", MB_ICONERROR);
 					}
-					free(selectedIdentifier);
 				}
 				break;
 			}

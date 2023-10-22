@@ -216,6 +216,7 @@ bool saveConfig(wchar_t *filename)
 	for (const std::pair<wchar_t *, Config> &entry : configs)
 	{
 		const wchar_t* identifier = entry.first;
+		std::wcout << "identifier = " << identifier << "\n";
 		std::wstring identifierWString(identifier);
 		std::string identifierString(identifierWString.begin(), identifierWString.end());
 		const Config& config = entry.second;
@@ -280,9 +281,16 @@ bool loadConfig(const wchar_t *filename)
 	if (!inputFile.is_open()) {
 		return true;
 	}
-
+	if (!inputFile.good()) {
+		inputFile.close();
+		return true;
+	}
 	Json::Value root;
-	inputFile >> root; // Parse the JSON data from the file
+	try {
+		inputFile >> root; // Parse the JSON data from the file
+	} catch (const std::exception &e) {
+		return true;
+	}
 
 	// Alignement conversion map
 	std::map<TextAlignment, std::string> alignmentToString =
