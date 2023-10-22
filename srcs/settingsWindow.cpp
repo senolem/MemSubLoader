@@ -145,8 +145,10 @@ LRESULT CALLBACK SettingsWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 				case SAVE_BUTTON:
 				{
-					std::wcout << tmpConfig.identifier << "\n";
+					std::wcout << tmpConfig.fontColor << "\n";
+					std::wcout << configs[tmpConfig.identifier].fontColor << "\n";
 					configs[tmpConfig.identifier] = tmpConfig;
+					std::wcout << configs[tmpConfig.identifier].fontColor << "\n";
 					DestroyWindow(hwnd);
 				}
 				break;

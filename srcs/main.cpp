@@ -90,7 +90,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			wsprintf(message, L"Failed to autoload configuration :\n%s\nDeleted configuration autoload", autoloadPath);
 			MessageBox(NULL, message, L"Configuration autoloading", MB_ICONERROR);
 			
-			Config defaultConfig;
+			Config defaultConfig = {};
+			defaultConfig.identifier = wcsdup(L"DEFAULT");
 			configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 			HFONT hSystemFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 			GetObject(hSystemFont, sizeof(LOGFONT), &defaultConfig.subtitlesFont);
@@ -99,6 +100,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else // No autoload.dat found
 	{
 		Config defaultConfig = {};
+		defaultConfig.identifier = wcsdup(L"DEFAULT");
 		configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 		HFONT hSystemFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 		GetObject(hSystemFont, sizeof(LOGFONT), &defaultConfig.subtitlesFont);
