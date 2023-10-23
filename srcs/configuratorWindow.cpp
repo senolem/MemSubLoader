@@ -79,6 +79,8 @@ LRESULT CALLBACK ConfiguratorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 
 						Config newConfig = {};
 						newConfig.identifier = wcsdup(buffer);
+						HFONT hSystemFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+						GetObject(hSystemFont, sizeof(LOGFONT), &newConfig.subtitlesFont);
 						configs.insert({ wcsdup(buffer), newConfig });
 						updateConfiguratorWindowAttributes();
 					}

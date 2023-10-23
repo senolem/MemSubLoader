@@ -216,7 +216,6 @@ bool saveConfig(wchar_t *filename)
 	for (const std::pair<wchar_t *, Config> &entry : configs)
 	{
 		const wchar_t* identifier = entry.first;
-		std::wcout << "identifier = " << identifier << "\n";
 		std::wstring identifierWString(identifier);
 		std::string identifierString(identifierWString.begin(), identifierWString.end());
 		const Config& config = entry.second;
@@ -229,8 +228,13 @@ bool saveConfig(wchar_t *filename)
 		
 		std::wstring fontFaceNameWString(config.subtitlesFont.lfFaceName);
 		std::string fontFaceNameString(fontFaceNameWString.begin(), fontFaceNameWString.end());
-		configObject["fontFaceName"] = Json::Value(config.subtitlesFont.lfFaceName);
+		configObject["fontFaceName"] = Json::Value(static_cast<Json::String>(fontFaceNameString));
+
 		configObject["fontHeight"] = Json::Value(static_cast<Json::Int>(config.subtitlesFont.lfHeight));
+		configObject["fontWeight"] = Json::Value(static_cast<Json::Int>(config.subtitlesFont.lfWeight));
+		configObject["fontItalic"] = config.subtitlesFont.lfItalic;
+		configObject["fontUnderline"] = config.subtitlesFont.lfUnderline;
+		configObject["fontStrikeout"] = config.subtitlesFont.lfStrikeOut;
 
 		// Alignment
 		configObject["horizontalAlignment"] = config.horizontalAlignment;
@@ -348,10 +352,30 @@ bool loadConfig(const wchar_t *filename)
 			config.fontColorAlpha = configObject["fontColorAlpha"].asInt();
 		}
 		if (configObject.isMember("fontFaceName") && configObject["fontFaceName"].isString()) {
-			wcsncpy(config.subtitlesFont.lfFaceName, identifier, LF_FACESIZE);
+			if (configObject["fontFaceName"].size() < LF_FACESIZE) {
+				std::string faceNameString = configObject["fontFaceName"].asString();
+				std::wstring wFaceName = std::wstring(faceNameString.begin(), faceNameString.end());
+				wcsncpy(config.subtitlesFont.lfFaceName, wFaceName.c_str(), LF_FACESIZE);
+			}
 		}
 		if (configObject.isMember("fontHeight")) {
 			config.subtitlesFont.lfHeight = configObject["fontHeight"].asInt();
+		}
+
+		if (configObject.isMember("fontWeight")) {
+			config.subtitlesFont.lfWeight = configObject["fontWeight"].asInt();
+		}
+
+		if (configObject.isMember("fontItalic")) {
+			config.subtitlesFont.lfItalic = configObject["fontItalic"].asBool();
+		}
+
+		if (configObject.isMember("fontUnderline")) {
+			config.subtitlesFont.lfUnderline = configObject["fontUnderline"].asBool();
+		}
+
+		if (configObject.isMember("fontStrikeout")) {
+			config.subtitlesFont.lfStrikeOut = configObject["fontStrikeout"].asBool();
 		}
 
 		// Alignement

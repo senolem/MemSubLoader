@@ -92,18 +92,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			
 			Config defaultConfig = {};
 			defaultConfig.identifier = wcsdup(L"DEFAULT");
-			configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 			HFONT hSystemFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 			GetObject(hSystemFont, sizeof(LOGFONT), &defaultConfig.subtitlesFont);
+			configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 		}
 	}
 	else // No autoload.dat found
 	{
 		Config defaultConfig = {};
 		defaultConfig.identifier = wcsdup(L"DEFAULT");
-		configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 		HFONT hSystemFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 		GetObject(hSystemFont, sizeof(LOGFONT), &defaultConfig.subtitlesFont);
+		configs.insert({ wcsdup(L"DEFAULT"), defaultConfig });
 	}
 
 	int res = createMainWindow(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
